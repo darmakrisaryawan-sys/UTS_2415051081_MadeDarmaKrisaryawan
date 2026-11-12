@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/category_chip.dart';
 import '../widgets/culture_card.dart';
+import 'culture_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,37 +12,39 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'Semua';
-  final List<String> _categories = [
-    'Semua',
-    'Tari',
-    'Pura',
-    'Upacara',
-    'Musik',
-  ];
+  final List<String> _categories = ['Semua', 'Tari', 'Pura', 'Upacara', 'Musik'];
 
   final _dummyCultures = [
     {
+      'id': '1',
       'name': 'Tari Kecak',
       'category': 'Tari',
       'location': 'Uluwatu, Badung',
+      'description': 'Pertunjukan seni tari dan drama musikal khas Bali yang dimainkan oleh puluhan penari laki-laki yang duduk melingkar dan menyerukan kata cak secara bersahutan.',
       'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Kecak_dance_in_Uluwatu.jpg/800px-Kecak_dance_in_Uluwatu.jpg',
     },
     {
+      'id': '2',
       'name': 'Pura Besakih',
       'category': 'Pura',
       'location': 'Rendang, Karangasem',
+      'description': 'Kompleks pura terbesar dan tersuci bagi umat Hindu di Bali yang terletak di lereng barat daya Gunung Agung.',
       'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Pura_Besakih_Bali_Indonesia.jpg/800px-Pura_Besakih_Bali_Indonesia.jpg',
     },
     {
+      'id': '3',
       'name': 'Upacara Ngaben',
       'category': 'Upacara',
       'location': 'Seluruh Bali',
+      'description': 'Upacara pembakaran jenazah umat Hindu di Bali sebagai proses penyucian roh (Atma) menuju alam Pitra.',
       'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Ngaben_ceremony_in_Ubud.jpg/800px-Ngaben_ceremony_in_Ubud.jpg',
     },
     {
+      'id': '4',
       'name': 'Gamelan Gong Kebyar',
       'category': 'Musik',
       'location': 'Buleleng, Bali',
+      'description': 'Ansambel musik tradisional Bali yang memiliki karakter permainan dinamis, cepat, dan penuh ledakan emosi musikal.',
       'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Gamelan_Bali.jpg/800px-Gamelan_Bali.jpg',
     },
   ];
@@ -50,7 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('BaliCulture'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('BaliCulture'),
+        centerTitle: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -139,7 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           category: item['category']!,
                           location: item['location']!,
                           imageUrl: item['image']!,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CultureDetailScreen(cultureData: item),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
@@ -155,7 +167,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           category: item['category']!,
                           location: item['location']!,
                           imageUrl: item['image']!,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CultureDetailScreen(cultureData: item),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
