@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'providers/culture_provider.dart';
+import 'providers/journal_provider.dart';
 import 'screens/main_navigation_screen.dart';
 
 void main() {
@@ -11,23 +13,29 @@ class BaliCultureApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BaliCulture',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8B1E1E),
-          primary: const Color(0xFF8B1E1E),
-          secondary: const Color(0xFFD4AF37),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CultureProvider()),
+        ChangeNotifierProvider(create: (_) => JournalProvider()),
+      ],
+      child: MaterialApp(
+        title: 'BaliCulture',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF8B1E1E),
+            primary: const Color(0xFF8B1E1E),
+            secondary: const Color(0xFFD4AF37),
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF8B1E1E),
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF8B1E1E),
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
+        home: const MainNavigationScreen(),
       ),
-      home: const MainNavigationScreen(),
     );
   }
 }

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import '../models/culture_model.dart';
 import 'add_journal_screen.dart';
 
 class CultureDetailScreen extends StatelessWidget {
-  final Map<String, String> cultureData;
+  final CultureModel culture;
 
-  const CultureDetailScreen({super.key, required this.cultureData});
+  const CultureDetailScreen({super.key, required this.culture});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(cultureData['name'] ?? 'Detail Budaya')),
+      appBar: AppBar(title: Text(culture.name)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              cultureData['image'] ?? '',
+              culture.imageUrl,
               width: double.infinity,
               height: 240,
               fit: BoxFit.cover,
@@ -32,14 +33,14 @@ class CultureDetailScreen extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(
-                      cultureData['category'] ?? '-',
+                      culture.category,
                       style: const TextStyle(color: Color(0xFF8B1E1E), fontWeight: FontWeight.bold),
                     ),
                     backgroundColor: const Color(0xFF8B1E1E).withValues(alpha: 0.1),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    cultureData['name'] ?? '',
+                    culture.name,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
@@ -47,9 +48,11 @@ class CultureDetailScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.location_on, size: 18, color: Color(0xFF8B1E1E)),
                       const SizedBox(width: 4),
-                      Text(
-                        cultureData['location'] ?? '-',
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                      Expanded(
+                        child: Text(
+                          culture.location,
+                          style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                        ),
                       ),
                     ],
                   ),
@@ -60,7 +63,7 @@ class CultureDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    cultureData['description'] ?? 'Belum ada deskripsi.',
+                    culture.description,
                     style: const TextStyle(fontSize: 15, height: 1.5),
                   ),
                   const SizedBox(height: 28),
@@ -72,8 +75,8 @@ class CultureDetailScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => AddJournalScreen(
-                              initialCultureId: cultureData['id'] ?? '0',
-                              initialTitle: cultureData['name'] ?? '',
+                              initialCultureId: culture.id,
+                              initialTitle: culture.name,
                             ),
                           ),
                         );

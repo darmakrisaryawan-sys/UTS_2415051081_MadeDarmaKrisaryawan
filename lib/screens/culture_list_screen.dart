@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/culture_provider.dart';
 import '../widgets/culture_card.dart';
+import '../widgets/state_feedback_widget.dart';
 import 'culture_detail_screen.dart';
 
 class CultureListScreen extends StatelessWidget {
@@ -7,81 +10,87 @@ class CultureListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dummyCultures = [
-      {
-        'id': '1',
-        'name': 'Tari Kecak',
-        'category': 'Tari',
-        'location': 'Uluwatu, Badung',
-        'description': 'Pertunjukan seni tari dan drama musikal khas Bali yang dimainkan oleh puluhan penari laki-laki.',
-        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Kecak_dance_in_Uluwatu.jpg/800px-Kecak_dance_in_Uluwatu.jpg',
-      },
-      {
-        'id': '2',
-        'name': 'Pura Besakih',
-        'category': 'Pura',
-        'location': 'Rendang, Karangasem',
-        'description': 'Kompleks pura terbesar dan tersuci bagi umat Hindu di Bali yang terletak di lereng Gunung Agung.',
-        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Pura_Besakih_Bali_Indonesia.jpg/800px-Pura_Besakih_Bali_Indonesia.jpg',
-      },
-    ];
+    final cultureProvider = context.watch<CultureProvider>();
+    final cultures = cultureProvider.cultures;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Katalog Budaya Bali')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth >= 600) {
-              return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.05,
-                ),
-                itemCount: dummyCultures.length,
-                itemBuilder: (context, index) {
-                  final item = dummyCultures[index];
-                  return CultureCard(
-                    name: item['name']!,
-                    category: item['category']!,
-                    location: item['location']!,
-                    imageUrl: item['image']!,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CultureDetailScreen(cultureData: item),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            }
-            return ListView.separated(
-              itemCount: dummyCultures.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = dummyCultures[index];
-                return CultureCard(
-                  name: item['name']!,
-                  category: item['category']!,
-                  location: item['location']!,
-                  imageUrl: item['image']!,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CultureDetailScreen(cultureData: item),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
+        child: Column(
+          children: [
+            TextField(
+              onChanged: (value) => cultureProvider.setSearchQuery(value),
+              decoration: InputDecoration(
+                hintText: 'Cari nama tarian, pura, atau lokasi...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: cultures.isEmpty
+                  ? const StateFeedbackWidget(
+                      icon: Icons.search_off,
+                      title: 'Pencarian Tidak Ditemukan',
+                      subtitle: 'Coba gunakan kata kunci nama budaya atau lokasi lain.',
+                    )
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth >= 600) {
+                          return GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.05,
+                            ),
+                            itemCount: cultures.length,
+                            itemBuilder: (context, index) {
+                              final item = cultures[index];
+                              return CultureCard(
+                                name: item.name,
+                                category: item.category,
+                                location: item.location,
+                                imageUrl: item.imageUrl,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CultureDetailScreen(culture: item),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        }
+                        return ListView.separated(
+                          itemCount: cultures.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final item = cultures[index];
+                            return CultureCard(
+                              name: item.name,
+                              category: item.category,
+                              location: item.location,
+                              imageUrl: item.imageUrl,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CultureDetailScreen(culture: item),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );
