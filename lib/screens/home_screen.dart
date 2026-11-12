@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../widgets/category_chip.dart';
 import '../widgets/culture_card.dart';
 
@@ -11,7 +12,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'Semua';
-  final List<String> _categories = ['Semua', 'Tari', 'Pura', 'Upacara', 'Musik'];
+  final List<String> _categories = [
+    'Semua',
+    'Tari',
+    'Pura',
+    'Upacara',
+    'Musik',
+  ];
 
   final _dummyCultures = [
     {
@@ -26,15 +33,24 @@ class _HomeScreenState extends State<HomeScreen> {
       'location': 'Rendang, Karangasem',
       'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Pura_Besakih_Bali_Indonesia.jpg/800px-Pura_Besakih_Bali_Indonesia.jpg',
     },
+    {
+      'name': 'Upacara Ngaben',
+      'category': 'Upacara',
+      'location': 'Seluruh Bali',
+      'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Ngaben_ceremony_in_Ubud.jpg/800px-Ngaben_ceremony_in_Ubud.jpg',
+    },
+    {
+      'name': 'Gamelan Gong Kebyar',
+      'category': 'Musik',
+      'location': 'Buleleng, Bali',
+      'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Gamelan_Bali.jpg/800px-Gamelan_Bali.jpg',
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BaliCulture'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('BaliCulture'), centerTitle: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -101,20 +117,49 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Daftar Katalog Awal
+            // Responsive LayoutBuilder: Compact (ListView) vs Wide (GridView)
             Expanded(
-              child: ListView.separated(
-                itemCount: _dummyCultures.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final item = _dummyCultures[index];
-                  return CultureCard(
-                    name: item['name']!,
-                    category: item['category']!,
-                    location: item['location']!,
-                    imageUrl: item['image']!,
-                    onTap: () {},
-                  );
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 600) {
+                    // Kondisi Wide / Expanded (Tablet / Landscape)
+                    final crossAxisCount = constraints.maxWidth >= 900 ? 3 : 2;
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.05,
+                      ),
+                      itemCount: _dummyCultures.length,
+                      itemBuilder: (context, index) {
+                        final item = _dummyCultures[index];
+                        return CultureCard(
+                          name: item['name']!,
+                          category: item['category']!,
+                          location: item['location']!,
+                          imageUrl: item['image']!,
+                          onTap: () {},
+                        );
+                      },
+                    );
+                  } else {
+                    // Kondisi Compact (HP Portrait)
+                    return ListView.separated(
+                      itemCount: _dummyCultures.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final item = _dummyCultures[index];
+                        return CultureCard(
+                          name: item['name']!,
+                          category: item['category']!,
+                          location: item['location']!,
+                          imageUrl: item['image']!,
+                          onTap: () {},
+                        );
+                      },
+                    );
+                  }
                 },
               ),
             ),
