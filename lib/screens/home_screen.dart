@@ -19,6 +19,13 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('BaliCulture'),
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Muat ulang API',
+            onPressed: () => cultureProvider.loadCultures(),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -41,7 +48,11 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Jelajahi Warisan Budaya Bali',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   SizedBox(height: 6),
                   Text(
@@ -78,46 +89,40 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             Expanded(
-              child: cultures.isEmpty
-                  ? const StateFeedbackWidget(
+              child: Builder(
+                builder: (context) {
+                  if (cultureProvider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (cultureProvider.errorMessage != null) {
+                    return StateFeedbackWidget(
+                      icon: Icons.wifi_off,
+                      title: 'Gagal Memuat Data',
+                      subtitle: cultureProvider.errorMessage!,
+                      actionLabel: 'Coba Lagi',
+                      onAction: () => cultureProvider.loadCultures(),
+                    );
+                  }
+                  if (cultures.isEmpty) {
+                    return const StateFeedbackWidget(
                       icon: Icons.search_off,
                       title: 'Tidak Ada Data',
                       subtitle: 'Budaya pada kategori ini belum tersedia.',
-                    )
-                  : LayoutBuilder(
-                      builder: (context, constraints) {
-                        if (constraints.maxWidth >= 600) {
-                          final crossAxisCount = constraints.maxWidth >= 900 ? 3 : 2;
-                          return GridView.builder(
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.05,
-                            ),
-                            itemCount: cultures.length,
-                            itemBuilder: (context, index) {
-                              final item = cultures[index];
-                              return CultureCard(
-                                name: item.name,
-                                category: item.category,
-                                location: item.location,
-                                imageUrl: item.imageUrl,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => CultureDetailScreen(culture: item),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        }
-                        return ListView.separated(
+                    );
+                  }
+
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth >= 600) {
+                        final crossAxisCount = constraints.maxWidth >= 900 ? 3 : 2;
+                        return GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.05,
+                          ),
                           itemCount: cultures.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final item = cultures[index];
                             return CultureCard(
@@ -136,8 +141,32 @@ class HomeScreen extends StatelessWidget {
                             );
                           },
                         );
-                      },
-                    ),
+                      }
+                      return ListView.separated(
+                        itemCount: cultures.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final item = cultures[index];
+                          return CultureCard(
+                            name: item.name,
+                            category: item.category,
+                            location: item.location,
+                            imageUrl: item.imageUrl,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CultureDetailScreen(culture: item),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
