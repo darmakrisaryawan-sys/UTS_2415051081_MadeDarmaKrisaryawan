@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/culture_provider.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/culture_card.dart';
@@ -12,7 +13,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cultureProvider = context.watch<CultureProvider>();
-    final categories = ['Semua', 'Tari', 'Pura', 'Upacara', 'Musik'];
+    final categories = ['Semua', 'Tari', 'Pura', 'Upacara', 'Musik', 'Tradisi'];
     final cultures = cultureProvider.cultures;
 
     return Scaffold(
@@ -56,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Temukan seni tari, pura bersejarah, dan tradisi sakral Pulau Dewata.',
+                    'Temukan seni tari, pura bersejarah, upacara, musik, dan tradisi sakral Pulau Dewata.',
                     style: TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
@@ -64,7 +65,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Filter Kategori via Provider
+            // Filter Kategori Horizontal (Termasuk Tradisi)
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -82,9 +83,21 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            const Text(
-              'Katalog Budaya',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Katalog ${cultureProvider.selectedCategory}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${cultures.length} Item',
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
@@ -111,18 +124,47 @@ class HomeScreen extends StatelessWidget {
                     );
                   }
 
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxWidth >= 600) {
-                        final crossAxisCount = constraints.maxWidth >= 900 ? 3 : 2;
-                        return GridView.builder(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.05,
-                          ),
+                  return RefreshIndicator(
+                    onRefresh: () => cultureProvider.loadCultures(),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth >= 600) {
+                          final crossAxisCount = constraints.maxWidth >= 900
+                              ? 3
+                              : 2;
+                          return GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 1.05,
+                                ),
+                            itemCount: cultures.length,
+                            itemBuilder: (context, index) {
+                              final item = cultures[index];
+                              return CultureCard(
+                                name: item.name,
+                                category: item.category,
+                                location: item.location,
+                                imageUrl: item.imageUrl,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          CultureDetailScreen(culture: item),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        }
+                        return ListView.separated(
                           itemCount: cultures.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final item = cultures[index];
                             return CultureCard(
@@ -134,36 +176,16 @@ class HomeScreen extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => CultureDetailScreen(culture: item),
+                                    builder: (_) =>
+                                        CultureDetailScreen(culture: item),
                                   ),
                                 );
                               },
                             );
                           },
                         );
-                      }
-                      return ListView.separated(
-                        itemCount: cultures.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final item = cultures[index];
-                          return CultureCard(
-                            name: item.name,
-                            category: item.category,
-                            location: item.location,
-                            imageUrl: item.imageUrl,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => CultureDetailScreen(culture: item),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                      },
+                    ),
                   );
                 },
               ),
