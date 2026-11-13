@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/journal_model.dart';
 import '../repositories/journal_repository.dart';
 
@@ -10,9 +11,10 @@ class JournalProvider extends ChangeNotifier {
   String? _errorMessage;
   String _userName = 'Made Darma Krisaryawan';
   String _userBio = 'Pecinta Seni & Budaya Pulau Dewata';
+  String? _profileImagePath;
 
   JournalProvider({JournalRepository? repository})
-      : _repository = repository ?? JournalRepository() {
+    : _repository = repository ?? JournalRepository() {
     loadJournals();
   }
 
@@ -21,10 +23,16 @@ class JournalProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String get userName => _userName;
   String get userBio => _userBio;
+  String? get profileImagePath => _profileImagePath;
 
   void updateUserProfile(String name, String bio) {
     _userName = name;
     _userBio = bio;
+    notifyListeners();
+  }
+
+  void updateProfileImage(String? path) {
+    _profileImagePath = path;
     notifyListeners();
   }
 
