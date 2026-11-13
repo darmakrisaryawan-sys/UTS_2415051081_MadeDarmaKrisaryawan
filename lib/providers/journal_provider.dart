@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/journal_model.dart';
+import '../repositories/journal_repository.dart';
 
 class JournalProvider extends ChangeNotifier {
-  List<JournalModel> _journals = [
-    JournalModel(
-      id: 1,
-      cultureId: '1',
-      title: 'Tari Kecak Uluwatu',
-      note: 'Sangat memukau saat matahari terbenam di tebing Uluwatu!',
-      rating: 5,
-      createdAt: DateTime.now(),
-    ),
-  ];
+  final JournalRepository _repository;
 
+  List<JournalModel> _journals = [];
   bool _isLoading = false;
   String? _errorMessage;
   String _userName = 'Made Darma Krisaryawan';
   String _userBio = 'Pecinta Seni & Budaya Pulau Dewata';
+
+  JournalProvider({JournalRepository? repository})
+      : _repository = repository ?? JournalRepository() {
+    loadJournals();
+  }
 
   List<JournalModel> get journals => _journals;
   bool get isLoading => _isLoading;
@@ -30,47 +28,33 @@ class JournalProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setJournals(List<JournalModel> data) {
-    _journals = data;
+  Future<void> loadJournals() async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-  }
 
-  void setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  void setError(String? message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  // Simulasi CRUD lokal sementara sebelum terhubung ke Supabase di Tahap 9–12
-  void addLocalJournal(JournalModel journal) {
-    _journals.insert(
-      0,
-      JournalModel(
-        id: DateTime.now().millisecondsSinceEpoch,
-        cultureId: journal.cultureId,
-        title: journal.title,
-        note: journal.note,
-        rating: journal.rating,
-        createdAt: DateTime.now(),
-      ),
-    );
-    notifyListeners();
-  }
-
-  void updateLocalJournal(JournalModel updated) {
-    final index = _journals.indexWhere((j) => j.id == updated.id);
-    if (index != -1) {
-      _journals[index] = updated;
+    try {
+      _journals = await _repository.fetchJournals();
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  void deleteLocalJournal(int id) {
-    _journals.removeWhere((j) => j.id == id);
-    notifyListeners();
+  Future<void> addJournal(JournalModel journal) async {
+    await _repository.createJournal(journal);
+    await loadJournals();
+  }
+
+  Future<void> updateJournal(JournalModel journal) async {
+    await _repository.editJournal(journal);
+    await loadJournals();
+  }
+
+  Future<void> deleteJournal(int id) async {
+    await _repository.removeJournal(id);
+    await loadJournals();
   }
 }
