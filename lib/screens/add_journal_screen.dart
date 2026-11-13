@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/journal_model.dart';
+import '../providers/journal_provider.dart';
 
 class AddJournalScreen extends StatefulWidget {
   final String? initialCultureId;
   final String? initialTitle;
 
-  const AddJournalScreen({
-    super.key,
-    this.initialCultureId,
-    this.initialTitle,
-  });
+  const AddJournalScreen({super.key, this.initialCultureId, this.initialTitle});
 
   @override
   State<AddJournalScreen> createState() => _AddJournalScreenState();
@@ -19,6 +19,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
   late TextEditingController _titleController;
   final TextEditingController _noteController = TextEditingController();
   int _rating = 5;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -31,6 +32,41 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+
+    final newJournal = JournalModel(
+      cultureId: widget.initialCultureId ?? '0',
+      title: _titleController.text.trim(),
+      note: _noteController.text.trim(),
+      rating: _rating,
+    );
+
+    try {
+      await context.read<JournalProvider>().addJournal(newJournal);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Jurnal budaya berhasil disimpan ke database!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -49,8 +85,9 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
                   labelText: 'Nama Budaya / Pura / Tari',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Nama budaya wajib diisi' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Nama budaya wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
@@ -60,7 +97,12 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: [1, 2, 3, 4, 5]
-                    .map((val) => DropdownMenuItem(value: val, child: Text('$val Bintang')))
+                    .map(
+                      (val) => DropdownMenuItem(
+                        value: val,
+                        child: Text('$val Bintang'),
+                      ),
+                    )
                     .toList(),
                 onChanged: (val) => setState(() => _rating = val ?? 5),
               ),
@@ -72,25 +114,28 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
                   labelText: 'Catatan Kunjungan / Kesan',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Catatan tidak boleh kosong' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Catatan tidak boleh kosong'
+                    : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Simulasi simpan berhasil (Database di Tahap 10)')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _isSubmitting ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8B1E1E),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Simpan Jurnal'),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Simpan Jurnal'),
               ),
             ],
           ),
