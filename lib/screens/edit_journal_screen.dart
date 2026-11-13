@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/journal_model.dart';
+import '../providers/journal_provider.dart';
 
 class EditJournalScreen extends StatefulWidget {
   final int journalId;
+  final String cultureId;
   final String initialTitle;
   final String initialNote;
   final int initialRating;
@@ -9,6 +14,7 @@ class EditJournalScreen extends StatefulWidget {
   const EditJournalScreen({
     super.key,
     required this.journalId,
+    this.cultureId = '0',
     required this.initialTitle,
     required this.initialNote,
     required this.initialRating,
@@ -23,6 +29,7 @@ class _EditJournalScreenState extends State<EditJournalScreen> {
   late TextEditingController _titleController;
   late TextEditingController _noteController;
   late int _rating;
+  bool _isUpdating = false;
 
   @override
   void initState() {
@@ -37,6 +44,42 @@ class _EditJournalScreenState extends State<EditJournalScreen> {
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isUpdating = true);
+
+    final updatedJournal = JournalModel(
+      id: widget.journalId,
+      cultureId: widget.cultureId,
+      title: _titleController.text.trim(),
+      note: _noteController.text.trim(),
+      rating: _rating,
+    );
+
+    try {
+      await context.read<JournalProvider>().updateJournal(updatedJournal);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Jurnal budaya berhasil diperbarui!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isUpdating = false);
+    }
   }
 
   @override
@@ -55,8 +98,9 @@ class _EditJournalScreenState extends State<EditJournalScreen> {
                   labelText: 'Nama Budaya',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Nama budaya wajib diisi' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Nama budaya wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
@@ -66,7 +110,12 @@ class _EditJournalScreenState extends State<EditJournalScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: [1, 2, 3, 4, 5]
-                    .map((val) => DropdownMenuItem(value: val, child: Text('$val Bintang')))
+                    .map(
+                      (val) => DropdownMenuItem(
+                        value: val,
+                        child: Text('$val Bintang'),
+                      ),
+                    )
                     .toList(),
                 onChanged: (val) => setState(() => _rating = val ?? 5),
               ),
@@ -78,25 +127,28 @@ class _EditJournalScreenState extends State<EditJournalScreen> {
                   labelText: 'Catatan Kunjungan',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Catatan wajib diisi' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Catatan wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Simulasi update berhasil (Database di Tahap 11)')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _isUpdating ? null : _updateForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8B1E1E),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Perbarui Jurnal'),
+                child: _isUpdating
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Perbarui Jurnal'),
               ),
             ],
           ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/journal_provider.dart';
 import '../widgets/state_feedback_widget.dart';
 import 'add_journal_screen.dart';
@@ -20,6 +19,7 @@ class JournalListScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Muat ulang jurnal',
             onPressed: () => journalProvider.loadJournals(),
           ),
         ],
@@ -42,7 +42,8 @@ class JournalListScreen extends StatelessWidget {
             return const StateFeedbackWidget(
               icon: Icons.bookmark_border,
               title: 'Belum Ada Jurnal',
-              subtitle: 'Tekan tombol + Tambah Jurnal untuk menyimpan pengalaman budaya Bali Anda.',
+              subtitle:
+                  'Tekan tombol + Tambah Jurnal untuk menyimpan pengalaman budaya Bali Anda.',
             );
           }
 
@@ -65,12 +66,14 @@ class JournalListScreen extends StatelessWidget {
                   subtitle: Text('Rating: ${item.rating}/5 • ${item.note}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
+                    tooltip: 'Edit Jurnal',
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => EditJournalScreen(
                             journalId: item.id ?? 0,
+                            cultureId: item.cultureId,
                             initialTitle: item.title,
                             initialNote: item.note,
                             initialRating: item.rating,
