@@ -10,6 +10,10 @@ Aplikasi mobile dan web berbasis **Flutter** dan **Supabase** untuk menjelajahi 
 * **Kelas:** PTI 5B
 * **Program Studi:** Pendidikan Teknik Informatika — Fakultas Teknik dan Kejuruan, Universitas Pendidikan Ganesha (Undiksha)
 
+
+## Unduh Aplikasi (Android APK)
+Aplikasi versi rilis siap pasang (`app-release.apk`) dapat diunduh melalui tautan Google Drive berikut:
+* **[Unduh BaliCulture APK (Google Drive)](https://drive.google.com/file/d/1Wvu2QWVEHqogh2IIRAZUq69A61WLPhwc/view?usp=sharing)**
 ---
 
 ## Fitur Utama Aplikasi
